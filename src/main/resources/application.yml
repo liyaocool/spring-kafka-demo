@@ -1,0 +1,9 @@
+server:
+  port: 7070
+
+spring:
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9093,localhost:9094,localhost:9095
+    consumer:
+      bootstrap-servers: localhost:9093,localhost:9094,localhost:9095
