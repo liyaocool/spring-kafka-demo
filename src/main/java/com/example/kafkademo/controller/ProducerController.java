@@ -1,5 +1,8 @@
 package com.example.kafkademo.controller;
 
+import com.example.kafkademo.config.KafkaConstants;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.Properties;
 
 @RestController
@@ -17,18 +21,8 @@ public class ProducerController {
     @Resource
     KafkaTemplate<Object, Object> kafkaTemplate;
 
-    /**
-     * spring kafka 发送
-     *
-     * @param msg
-     * @return
-     */
-    @GetMapping("/easy_send")
-    public String easySend(String msg) {
-
-        kafkaTemplate.send("my-test", msg);
-        return "easy send msg: " + msg;
-    }
+    @Resource
+    ObjectMapper objectMapper;
 
     /**
      * 原始发送
@@ -38,17 +32,29 @@ public class ProducerController {
      */
     @GetMapping("/send")
     public String send(String msg) {
-        Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9093,localhost:9094,localhost:9095");
-        props.put("linger.ms", 1);
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        try {
+            HashMap<String, String> msgMap = new HashMap<>();
+            msgMap.put("orderId", "1");
+            msgMap.put("taskName", msg);
 
-        Producer<String, String> producer = new KafkaProducer<>(props);
-        for (int i = 0; i < 100; i++)
-            producer.send(new ProducerRecord<String, String>("my-test", Integer.toString(i), Integer.toString(i)));
+//            kafkaTemplate.send(KafkaConstants.TOPIC_TASK, objectMapper.writeValueAsString(msgMap));
+            kafkaTemplate.send(KafkaConstants.TOPIC_TASK, msgMap);
 
-        producer.close();
-        return "easy send msg: " + msg;
+            // //测试批量生产消费
+//            HashMap<String, String> msgMap2 = new HashMap<>();
+//            msgMap2.put("orderId", "2");
+//            msgMap2.put("taskName", msg);
+//            kafkaTemplate.send(KafkaConstants.TOPIC_TASK, msgMap2);
+//
+//            HashMap<String, String> msgMap3 = new HashMap<>();
+//            msgMap3.put("orderId", "3");
+//            msgMap3.put("taskName", msg);
+//            kafkaTemplate.send(KafkaConstants.TOPIC_TASK, msgMap3);
+            return "easy send msg: " + msg;
+        } catch (Exception e) {
+            return "error";
+        }
+
+
     }
 }
