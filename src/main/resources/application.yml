@@ -3,9 +3,10 @@ server:
 
 spring:
   kafka:
-    # 单次/批量消费
     listener:
-      type: batch
+      type: single
+      # 手动提交
+      ack-mode: manual
 
     producer:
       bootstrap-servers: localhost:9093,localhost:9094,localhost:9095
@@ -22,5 +23,9 @@ spring:
       enable-auto-commit: false
       auto-offset-reset: latest
       # 批量消费时最大拉取记录条数
-      max-poll-records: 2
+#      max-poll-records: 2
+
+#    template:
+#      # 默认主题
+#      default-topic: default_topic
 
